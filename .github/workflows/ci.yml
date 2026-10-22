@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Maven build and tests (JUnit Jupiter)
+        run: mvn -B test
+
+      - name: Dependency-free build and tests (javac + in-repo runner)
+        run: ./scripts/test.sh
+
+      - name: Demo over SIP
+        run: ./scripts/demo.sh --seed 7
+
+      - name: Demo over the PBX manager interface
+        run: ./scripts/demo.sh --platform manager --seed 7
+
+      - name: Load run
+        run: ./scripts/demo.sh --load --calls 2000
